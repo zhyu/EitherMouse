@@ -108,7 +108,6 @@ MouseChange:
    SwapRevScroll(    Mouse%A_Index%RevScroll)
    SwapRevHScroll(   Mouse%A_Index%RevHScroll)
    SwapClickLock(    Mouse%A_Index%ClickLock)
-   SwapWheelClick(   Mouse%A_Index%WheelClick)
    SwapSnapTo(       Mouse%A_Index%SnapTo)
    SwapEpp(          Mouse%A_Index%Epp)
    SetDouble(        Mouse%A_Index%Double)
@@ -175,7 +174,6 @@ MouseChange:
   Mouse%MouseCount%RevScroll  := 0
   Mouse%MouseCount%RevHScroll := 0
   Mouse%MouseCount%ClickLock  := ClickLock
-  Mouse%MouseCount%WheelClick := 0
   Mouse%MouseCount%SnapTo     := SnapTo
   Mouse%MouseCount%Epp        := Epp
   Mouse%MouseCount%Double     := Double
@@ -197,7 +195,6 @@ MouseChange:
   Mouse%MouseCount%RevScroll  := Mouse%ActiveMouse%RevScroll ="" ?0		:Mouse%ActiveMouse%RevScroll
   Mouse%MouseCount%RevHScroll := Mouse%ActiveMouse%RevHScroll="" ?0		:Mouse%ActiveMouse%RevHScroll
   Mouse%MouseCount%ClickLock  := Mouse%ActiveMouse%ClickLock ="" ?ClickLock	:Mouse%ActiveMouse%ClickLock
-  Mouse%MouseCount%WheelClick := Mouse%ActiveMouse%WheelClick="" ?0		:Mouse%ActiveMouse%WheelClick
   Mouse%MouseCount%SnapTo     := Mouse%ActiveMouse%SnapTo    ="" ?SnapTo	:Mouse%ActiveMouse%SnapTo
   Mouse%MouseCount%Epp        := Mouse%ActiveMouse%Epp       ="" ?Epp		:Mouse%ActiveMouse%Epp
   Mouse%MouseCount%Double     := Mouse%ActiveMouse%Double    ="" ?Double	:Mouse%ActiveMouse%Double
@@ -285,11 +282,6 @@ UpdateGui:
     {
      MouseGUILastClickLock := Mouse%A_Index%ClickLock
      GuiControl,10:, ClickLockCB, % Mouse%A_Index%ClickLock
-    }
-    If (MouseGUILastWheelClick = "") OR (Mouse%A_Index%WheelClick <> MouseGUILastWheelClick)
-    {
-     MouseGUILastWheelClick := Mouse%A_Index%WheelClick
-     GuiControl,10:, WheelClickCB, % Mouse%A_Index%WheelClick
     }
     If (MouseGUILastSnapTo = "") OR (Mouse%A_Index%SnapTo <> MouseGUILastSnapTo)
     {
@@ -448,7 +440,6 @@ Settings:
   RegRead, Mouse%A_Index%RevScroll,  	HKCU, Software\%Name%\Mouse%A_Index%, RevScroll
   RegRead, Mouse%A_Index%RevHScroll, 	HKCU, Software\%Name%\Mouse%A_Index%, RevHScroll
   RegRead, Mouse%A_Index%ClickLock,    	HKCU, Software\%Name%\Mouse%A_Index%, ClickLock
-  RegRead, Mouse%A_Index%WheelClick, 	HKCU, Software\%Name%\Mouse%A_Index%, WheelClick
   RegRead, Mouse%A_Index%SnapTo,    	HKCU, Software\%Name%\Mouse%A_Index%, SnapTo
   RegRead, Mouse%A_Index%Epp,     	HKCU, Software\%Name%\Mouse%A_Index%, Epp
   RegRead, Mouse%A_Index%Double,  	HKCU, Software\%Name%\Mouse%A_Index%, Double
@@ -462,7 +453,6 @@ Settings:
   Mouse%A_Index%RevScroll  :=  (Mouse%A_Index%RevScroll  = "")  				? 0  	 	: Mouse%A_Index%RevScroll
   Mouse%A_Index%RevHScroll :=  (Mouse%A_Index%RevHScroll = "")  				? 0  	 	: Mouse%A_Index%RevHScroll
   Mouse%A_Index%ClickLock  :=  (Mouse%A_Index%ClickLock  = "")  				? ClickLock  	: Mouse%A_Index%ClickLock
-  Mouse%A_Index%WheelClick :=  (Mouse%A_Index%WheelClick = "")  				? 0  	 	: Mouse%A_Index%WheelClick
   Mouse%A_Index%SnapTo     :=  (Mouse%A_Index%SnapTo     = "")  				? SnapTo  	: Mouse%A_Index%SnapTo
  }
  If MultiCursor
@@ -567,7 +557,6 @@ QuietSave:
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, RevScroll,  	% Mouse%A_Index%RevScroll
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, RevHScroll, 	% Mouse%A_Index%RevHScroll
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, ClickLock, 	% Mouse%A_Index%ClickLock
-  RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, WheelClick, 	% Mouse%A_Index%WheelClick
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, SnapTo, 	% Mouse%A_Index%SnapTo
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, Epp,    	% Mouse%A_Index%Epp
   RegWrite, REG_SZ, HKCU, Software\%Name%\Mouse%A_Index%, Double, 	% Mouse%A_Index%Double
@@ -628,7 +617,6 @@ SystemDefaults:
  SetWheel(Wheel)
  SwapRevScroll(0)
  SwapRevHScroll(0)
- SwapWheelClick(0)
  If pToken
   pToken := Gdip_Shutdown(pToken)
  ThisMouse := LastMouse := ""
@@ -1083,7 +1071,7 @@ GuiShow_:
 
 
  _c := Mouse%ActiveMouse%Nav +0
- Gui, 10:Add, CheckBox, x35  y352 w145 R1  -Wrap   vNavCB  gMainContextMenu Checked%_c%, Swap Navigation Buttons
+ Gui, 10:Add, CheckBox, x35  y352 w145 R1  -Wrap   vNavCB  gMainContextMenu Checked%_c%, % "Swap Back/Middle Buttons"
  _c := Mouse%ActiveMouse%RevScroll +0
  Gui, 10:Add, CheckBox, x35  y377 w145 R1  -Wrap   vRevScrollCB  gMainContextMenu BackgroundTrans Checked%_c%, % "Reverse scroll direction"
  _c := Mouse%ActiveMouse%RevHScroll +0
@@ -1092,8 +1080,6 @@ GuiShow_:
  Gui, 10:Add, CheckBox, x35  y427 w145 R1  -Wrap   vClickLockCB  gMainContextMenu BackgroundTrans Checked%_c%, % "Turn on Click Lock"
  _c := Mouse%ActiveMouse%SnapTo +0
  Gui, 10:Add, CheckBox, x35  y452 w145 R1  -Wrap   vSnapToCB  gMainContextMenu BackgroundTrans Checked%_c%, % "Snap To Default Button"
- _c := Mouse%ActiveMouse%WheelClick +0
- Gui, 10:Add, CheckBox, x35  y477 w145 R1  -Wrap   vWheelClickCB  gMainContextMenu BackgroundTrans Checked%_c%, % "Disable Wheel Click"
 
  Gui, 10:Add, Picture, x163 y140 w16  h16  vTrayIconMenu   AltSubmit gMainContextMenu Icon1,  %A_ScriptName%
 ;  Gui, 10:Add, Picture, x168 y52  w%_11%  h%_11%  vGuiMoreConfig AltSubmit gGuiMore Icon25,  %A_ScriptName%
@@ -1309,11 +1295,6 @@ QuickClickLock:
  GuiControl, 10:, ClickLockCB,  % Mouse%ActiveMouse%ClickLock
  GoSub, QuietSave
 Return
-QuickWheelClick:
- SwapWheelClick(Mouse%ActiveMouse%WheelClick := !Mouse%ActiveMouse%WheelClick)
- GuiControl, 10:, WheelClickCB,  % Mouse%ActiveMouse%WheelClick
- GoSub, QuietSave
-Return
 QuickSnapTo:
  SwapSnapTo(Mouse%ActiveMouse%SnapTo := !Mouse%ActiveMouse%SnapTo)
  GuiControl, 10:, SnapToCB,  % Mouse%ActiveMouse%SnapTo
@@ -1347,8 +1328,6 @@ MainContextMenu:
   GoSub, QuickRevHScroll
  Else If (A_GuiControl = "ClickLockCB")
   GoSub, QuickClickLock
- Else If (A_GuiControl = "WheelClickCB")
-  GoSub, QuickWheelClick
  Else If (A_GuiControl = "SnapToCB")
   GoSub, QuickSnapTo
  Else If (A_GuiControl = "Name___") OR (A_GuiControl = "GuiGear")
@@ -1474,15 +1453,14 @@ SetTrayNumber(Number, TextColor=0xff016bD6) {
 #MaxHotkeysPerInterval 700
 #HotkeyInterval 250
 Hotkeys:
- Hotkey, XButton1, XButton2, Off
- Hotkey, XButton2, XButton1, Off
+ Hotkey, XButton1, MButton, Off
+ Hotkey, MButton, XButton1, Off
  Hotkey, WheelDown, WheelUp, Off
  Hotkey, WheelUp, WheelDown, Off
  Hotkey, ^WheelDown, WheelUpCtrl, Off
  Hotkey, ^WheelUp, WheelDownCtrl, Off
  Hotkey, WheelLeft, WheelRight, Off
  Hotkey, WheelRight, WheelLeft, Off
- Hotkey, MButton, DoNothing, Off
  Hotkey, IfWinActive, ahk_class %Name%
  Hotkey, F1, About
  Hotkey, IfWinActive
@@ -1490,8 +1468,8 @@ Return
 XButton1:
  Send {XButton1}
 Return
-XButton2:
- Send {XButton2}
+MButton:
+  Send {MButton}
 Return
 WheelDown:
  Send {WheelDown}
@@ -1548,12 +1526,12 @@ SwapNav(swap=0) {
   If swap
   {
    Hotkey, XButton1, On
-   Hotkey, XButton2, On
+   Hotkey, MButton, On
   }
   Else
   {
    Hotkey, XButton1, Off
-   Hotkey, XButton2, Off
+   Hotkey, MButton, Off
   } 
   swap_ := swap
  }
@@ -1607,19 +1585,6 @@ SwapClickLock(swap=0) {
  If (swap_ <> swap)
   SetClickLock(swap)
  swap_ := swap
-Return
-}
-
-SwapWheelClick(swap=0) {
- static swap_
- If (swap_ <> swap)
- {
-  If swap
-   Hotkey, MButton, On
-  Else
-   Hotkey, MButton, Off
-  swap_ := swap
- }
 Return
 }
 
